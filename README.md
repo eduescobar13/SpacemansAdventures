@@ -1,8 +1,6 @@
 # ESIT ULL Grado de Informática
 ## INTELIGENCIA ARTIFICIAL. Desarrollo e implementación del Algoritmo A*, incluyendo una interfaz gráfica hecha en Java para su visualización.
-### Realizada por Eduardo Escobar Alberto
-
-#### **EJECUCIÓN: Haciendo uso del fichero .jar del repositorio.**
+#### Realizada por Eduardo Escobar Alberto, Berkan Reyes Hernández y Darwin González Suárez.
 
 Inicialmente nos aparece un panel de selección de la configuración del programa, en el que podemos elegir los siguientes aspectos:  
 
