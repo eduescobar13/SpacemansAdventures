@@ -1,0 +1,41 @@
+package spacemans_adventures_interface;
+
+import java.awt.Color;
+import java.awt.Dimension;
+
+import javax.swing.JButton;
+import javax.swing.border.LineBorder;
+
+public class game_over_panel {
+	
+	//-----> DECLARACIÓN DE LOS ATRIBUTOS DE LA CLASE.
+	
+		private Dimension dimension_backgroundpanel;
+		private JButton button_back;
+
+	//-----> DECLARACIÓN DE LOS MÉTODOS DE LA CLASE.
+		
+	public game_over_panel(Dimension size_backgroundpanel) { // Constructor.
+		
+		// Inicialización de los atributos de la clase.
+		dimension_backgroundpanel = size_backgroundpanel;
+		button_back = new JButton("VOLVER"); // Pasamos el String directamente al constructor.
+		
+		this.add_characteristics(); // Llamada al método add_characteristics() pasando las dimensiones del JFrame por parámetro.
+		this.add_components(); // Llamada al método add_components().
+	}
+
+	public void add_characteristics() { // Método para añadir las características de nuestro panel.
+		
+		this.setLayout(null); // Eliminamos el gestor de Layout por defecto para establecer nuestra propia colocación.
+		this.setSize(new Dimension(350,300)); // Establecemos las dimensiones de nuestro panel.
+		this.setLocation(((int)(dimension_backgroundpanel.getWidth()/2)-(this.getWidth()/2)),((int)(dimension_backgroundpanel.getHeight()/2)-(this.getHeight()/2))); // Añadimos una localizacióna nuestro initialpanel.
+		this.setBorder(new LineBorder(new Color(208,168,10),3)); // Establecemos un borde para nuestro panel.
+	}
+	
+	public void add_components() { // Método para añadir los elementos a nuestro panel.
+		
+		this.add(button_back); // Añadimos el botón de START.
+	}
+
+}

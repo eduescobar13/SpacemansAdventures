@@ -1,0 +1,22 @@
+package spacemans_adventures_interface;
+
+import java.awt.Dimension;
+
+import javax.swing.JButton;
+
+public class game_over_panel {
+	
+	//-----> DECLARACIÓN DE LOS ATRIBUTOS DE LA CLASE.
+	
+		private Dimension dimension_backgroundpanel;
+		private JButton button_back;
+
+	//-----> DECLARACIÓN DE LOS MÉTODOS DE LA CLASE.
+		
+	public game_over_panel(Dimension size_backgroundpanel) { // Constructor.
+		
+		// Inicialización de los atributos de la clase.
+		dimension_backgroundpanel = size_backgroundpanel;
+		button_back = new JButton("VOLVER"); // Pasamos el String directamente al constructor.
+	}
+}

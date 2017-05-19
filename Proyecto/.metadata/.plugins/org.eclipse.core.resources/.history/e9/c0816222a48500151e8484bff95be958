@@ -1,0 +1,230 @@
+package spacemans_adventures_interface;
+
+public class algorithmAstar { // Clase para implementar el algoritmo de búsqueda de camino mínimo A*.
+
+//-----> DECLARACIÓN DE LOS ATRIBUTOS DE LA CLASE.
+	
+	private list lista_abierta; 
+	private list lista_cerrada;
+	private list lista_final;
+	private matrix dashboard;
+
+	private int origin_x; // Creamos los nodos de origen para desarrollar el primer paso del algoritmo.
+	private int origin_y;  // Creamos los nodos de origen para desarrollar el primer paso del algoritmo.
+	private int destiny_x; // Creamos los nodos de destino para comprobar que hemos llegado al destino cada vez que tomamos un nodo adyacente.
+	private int destiny_y; // Creamos los nodos de origen para desarrollar el primer paso del algoritmo.
+	
+	private boolean fin; // Variable boleana para establecer cuando llegamos al destino.
+	private int current_g; // Variable para almacenar el valor g del nodo en el que estamos actualmente. 
+
+//-----> DECLARACIÓN DE LOS MÉTODOS DE LA CLASE.
+
+	public algorithmAstar(matrix game_board) { // Constructor.
+
+		// Inicialización de las variables.
+		lista_abierta = new list();
+		lista_cerrada = new list();
+		lista_final = new list();
+		dashboard = game_board; // Inicializamos el atributo dashboard con nuestra matriz pasada por parámetro.
+
+		for (int i = 0; i < dashboard.get_rows(); i++) {
+			for (int j = 0; j < dashboard.get_columns(); j++) {
+				if(dashboard.get_value(i,j) == 80) { // CONDICÍON: Si el valor de uno de los elementos de la matriz se corresponde con el spaceman.
+					origin_x = i; // Inicializamos la posición del origen_x como la fila del mismo.
+					origin_y = j; // Inicializamos la posición del origen_y como la columna del mismo.
+				}
+				if(dashboard.get_value(i,j) == 100) { // CONDICÍON: Si el valor de uno de los elementos de la matriz se corresponde con el ironmonger.
+					destiny_x = i; // Inicializamos la posición del destino_x como la fila del mismo.
+					destiny_y = j; // Inicializamos la posición del destino_y como la columna del mismo.
+				}	
+			}
+		}
+		current_g = 0; // Inicializamos a 0 el valor de g.
+		fin = false; // Inicializamos la variable fin a false.	
+	}
+
+	public void TratarNodo(int i, int j, boolean dir, node padre) { // Método para ir comprobando los nodos, recibiendo las coordenadas y si el movimiento es diagonal.
+		if(fin == false) { // CONDICIÓN: Si no se ha llegado al final.
+			if(dashboard.get_value(i,j) == 100) { // CONDICIÓN: Si el nodo es el destino, acabamos.
+				fin = true;
+				return;
+			}
+			if(dashboard.get_value(i,j) <= 3) { // CONDICIÓN: Si el nodo es un obstaculo, lo ignoramos.
+				return;
+			}
+
+			node node = new node(i, j, false); // Si no se dan las condiciones anteriores, creamos una variable local con el nodo que vamos a tratar.
+
+			if(lista_cerrada.find(node)) { // CONDICIÓN: Si encuentra dicho nodo en la lista cerrada, lo ignoramos.
+				return;
+			}
+			
+			node.set_padre(padre); // Definimos el padre del nodo que estamos tratando.
+
+			// Calculamos primero la h de la función.
+			int i_manhattan = 0; // Variable local para almacenar la i manhattan. Inicializada en 0.
+			int j_manhattan = 0; // Variable local para almacenar la j manhattan. Inicializada en 0.
+			
+			if(i > destiny_x) { // CONDICIÓN: Si la i pasada por parámetro es mayor que el destino.
+				i_manhattan = i - destiny_x;
+			}
+			else {
+				i_manhattan = destiny_x - i;
+			}
+			if(j > destiny_y) { // CONDICIÓN: Si la j pasada por parámetro es mayor que el destino.
+				j_manhattan= j - destiny_y;
+			}
+			else {
+				j_manhattan= destiny_y - j;
+			}
+			
+			node.set_h((i_manhattan+j_manhattan)*10); // Establecemos la h de la función en el nodo.
+
+			// Calculamos ahora la g del sucesor.
+			if(dir == false) {
+				node.set_g(current_g + 10);
+			}
+			else {
+				node.set_g(current_g + 14);
+			}
+			
+			// Con g y h podemos calcular f.
+			node.calculate_f();
+
+			// ÚLTIMO PASO: Si el nodo está en la lista abierta, comprobamos si esa nueva g es mejor a la actual.
+			// Si es asi, recalculamos factores y ponemos como padre a la lista extraida. Si no esta, ignoramos.
+			// Para el resto de nodos, recalculamos valores y los metemos en la lista abierta.
+			if(lista_abierta.find(node)) { // CONDICIÓN: Si el nodo está en la lista abierta.
+				boolean encontrado = false; // Variable local boleana inicializada a false.
+				list_node nodoactual = lista_abierta.first;
+
+			  	while (encontrado != true) { // Mientras encontrado no sea igual a true.
+			  		if(nodoactual.getInfo().es_igual(node)) {
+			  			encontrado = true;
+			  		}
+			  		else {
+			  			nodoactual= nodoactual.getNext();
+			  		}
+		  		}
+		  		// Una vez que lo encontramos comprobamos el valor de su g.
+		  		if(nodoactual.getInfo().get_g() > node.get_g()) { // CONDICIÓN: Si es menor que la que tenemos en la cola, actualizamos y recalculamos f.
+		  			nodoactual.getInfo().set_g(node.get_g());
+		  			nodoactual.getInfo().set_padre(padre);
+		  			nodoactual.getInfo().calculate_f();
+		  		}
+			} 
+			else { // CONDICIÓN: Si no esta en la lista abierta, simplemente lo insertamos en esta.
+				lista_abierta.insert(node);
+			}
+		}
+	}
+
+	public list Comenzar() { // Método que comienza a ejecutar el algoritmo.
+
+		node origen = new node(origin_x, origin_y, false);
+		node destino = new node(destiny_x, destiny_y, false);
+		node intermedio = null;
+
+		lista_abierta.insert(origen);
+
+		while(fin != true) {
+			// Pop de la lista abierta y push a la lista cerrada.
+			if(lista_abierta.empty()) {
+				fin = true;
+				return null;
+			}
+			intermedio = lista_abierta.extract();
+			lista_cerrada.insert(intermedio);
+			current_g = intermedio.get_g();
+			
+			// Guardamos las coordenadas del nodo insertado en la lista cerrada.
+			int i = intermedio.get_id_x();
+			int j = intermedio.get_id_y();
+			
+			// Cogemos los nodos vecinos a los extraidos.
+			// Realizamos un control de bordes. Para conocer los nodos vecinos, necesitamos saber
+			// cuales son ya que nuestro nodo puede estar en una esquina o borde.
+			if((i != 0) && (j != 0) && (i != dashboard.get_rows() - 1) && (j != dashboard.get_columns() - 1)) {
+				TratarNodo(i, j+1,false,intermedio);
+				TratarNodo(i+1, j,false,intermedio);
+				TratarNodo(i, j-1,false,intermedio);
+				TratarNodo(i-1, j,false,intermedio);
+				TratarNodo(i+1, j+1,true,intermedio);
+				TratarNodo(i+1, j-1,true,intermedio);
+				TratarNodo(i-1, j-1,true,intermedio);
+				TratarNodo(i-1, j+1,true,intermedio);
+			}
+			else if(i == 0) {
+				if(j == 0) {
+					// ESQUINA SUPERIOR IZQUIERDA.
+					TratarNodo(i+1, j,false,intermedio);
+					TratarNodo(i, j+1,false,intermedio);
+					TratarNodo(i+1, j+1,true,intermedio);
+				}
+				else if(j == dashboard.get_columns() - 1) {
+					// ESQUINA SUPERIOR DERECHA.
+					TratarNodo(i, j-1,false,intermedio);
+					TratarNodo(i+1, j,false,intermedio);
+					TratarNodo(i+1, j-1,true,intermedio);
+				}
+				else{
+					// CENTRO SUPERIOR.
+					TratarNodo(i+1, j,false,intermedio);
+					TratarNodo(i, j-1,false,intermedio);
+					TratarNodo(i, j+1,false,intermedio);
+					TratarNodo(i+1, j-1,true,intermedio);
+					TratarNodo(i+1, j+1,true,intermedio);
+				}
+			}
+			else if(i == dashboard.get_rows() - 1) {
+				if(j == 0) {
+					// ESQUINA INFERIOR IZQUIERDA.
+					TratarNodo(i, j+1,false,intermedio);
+					TratarNodo(i-1, j,false,intermedio);
+					TratarNodo(i-1, j+1,true,intermedio);
+				}
+				else if(j == dashboard.get_columns() - 1) {
+					// ESQUINA INFERIOR DERECHA.
+					TratarNodo(i, j-1,false,intermedio);
+					TratarNodo(i-1, j,true,intermedio);
+					TratarNodo(i-1, j-1,true,intermedio);
+				}
+				else{
+					// CENTRO INFERIOR.
+					TratarNodo(i, j+1,false,intermedio);
+					TratarNodo(i, j-1,false,intermedio);
+					TratarNodo(i-1, j,false,intermedio);
+					TratarNodo(i-1, j+1,true,intermedio);
+					TratarNodo(i-1, j-1,true,intermedio);
+				}
+			}
+			else if(j == 0) {
+				// CENTRO IZQUIERDA.
+				TratarNodo(i-1, j,false,intermedio);
+				TratarNodo(i+1, j,false,intermedio);
+				TratarNodo(i, j+1,false,intermedio);
+				TratarNodo(i-1, j+1,true,intermedio);
+				TratarNodo(i+1, j+1,true,intermedio);
+			}
+			else if(j == dashboard.get_rows() - 1) {
+				// CENTRO DERECHA.
+				TratarNodo(i, j-1,false,intermedio);
+				TratarNodo(i+1, j,false,intermedio);
+				TratarNodo(i-1, j,false,intermedio);
+				TratarNodo(i-1, j-1,true,intermedio);
+				TratarNodo(i+1, j-1,true,intermedio);
+			}
+
+			lista_abierta.Ordenar(); // Ordenamos la lista abierta en función de f.
+			// Volvemos al pop de la lista abierta
+		}
+
+		// En intermedio esta el nodo previo a llegar al objetivo.
+		while(intermedio.get_padre() != null) {
+			// El nodo origen no tiene padre, asi que el bucle se detendrá al llegar a el.
+			lista_final.insert(intermedio);
+			intermedio = intermedio.get_padre();
+		}
+		return lista_final;
+	}
+}
